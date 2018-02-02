@@ -6,15 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TLWatch.Controllers
 {
-    [Route("api/[controller]")]
-    public class SampleDataController : Controller
+    public class SampleDataController : ApiController
     {
         private static string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        [HttpGet("[action]")]
+        [HttpGet]
         public IEnumerable<WeatherForecast> WeatherForecasts()
         {
             var rng = new Random();
