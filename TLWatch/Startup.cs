@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -9,6 +11,8 @@ using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
+using TLWatch.Controllers;
+using WebSocketMiddleware;
 
 namespace TLWatch
 {
@@ -20,6 +24,7 @@ namespace TLWatch
         }
 
         public IConfiguration Configuration { get; }
+        public IServiceProvider ServiceProvider { get; private set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -32,7 +37,9 @@ namespace TLWatch
                 var xmlPath = Path.Combine(basePath, "TLWatch.xml");
                 c.IncludeXmlComments(xmlPath);
             });
+            services.AddWebSocketControllers();
 
+            ServiceProvider = services.BuildServiceProvider();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,6 +59,9 @@ namespace TLWatch
             }
 
             app.UseStaticFiles();
+
+            app.UseWebSockets();
+            app.MapWebSocketController("/api/Chat", ServiceProvider.GetService<ChatController>());
 
             app.UseMvc(routes =>
             {
