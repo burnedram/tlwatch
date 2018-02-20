@@ -68,7 +68,7 @@ namespace TLWatch
             app.UseStaticFiles();
 
             app.UseWebSockets();
-            app.MapWebSocketController("/api/Chat", ServiceProvider.GetService<ChatController>());
+            app.MapWebSocketController("/ws/Chat", ServiceProvider.GetService<ChatController>());
 
             app.UseMvc(routes =>
             {
@@ -76,7 +76,7 @@ namespace TLWatch
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-            app.MapWhen(x => !x.Request.Path.Value.StartsWith("/api/"), builder =>
+            app.MapWhen(x => !x.Request.Path.Value.StartsWith("/api/") && !x.Request.Path.Value.StartsWith("/ws/"), builder =>
             {
                 builder.UseMvc(routes =>
                 {
