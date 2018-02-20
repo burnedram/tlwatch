@@ -1,0 +1,7 @@
+<h1>WebSockets</h1>
+
+<input *ngIf="socket" type="text" [(ngModel)]="echoStr" (keyup.enter)="echo()" placeholder="echo"/>
+
+<button (click)="socket ? echo() : connect()">{{ socket ? 'Echo' : 'Connect' }}</button>
+
+<span *ngFor="let msg of messages"><br />{{ msg.value }}</span>

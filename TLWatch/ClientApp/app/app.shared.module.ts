@@ -10,6 +10,7 @@ import { NavMenuComponent } from './components/navmenu/navmenu.component';
 import { HomeComponent } from './components/home/home.component';
 import { FetchDataComponent } from './components/fetchdata/fetchdata.component';
 import { CounterComponent } from './components/counter/counter.component';
+import { WebSocketComponent } from './components/websocket/websocket.component';
 
 @NgModule({
     declarations: [
@@ -17,6 +18,7 @@ import { CounterComponent } from './components/counter/counter.component';
         NavMenuComponent,
         CounterComponent,
         FetchDataComponent,
+        WebSocketComponent,
         HomeComponent
     ],
     imports: [
@@ -29,6 +31,7 @@ import { CounterComponent } from './components/counter/counter.component';
             { path: 'home', component: HomeComponent },
             { path: 'counter', component: CounterComponent },
             { path: 'fetch-data', component: FetchDataComponent },
+            { path: 'websocket', component: WebSocketComponent },
             { path: '**', redirectTo: 'home' }
         ])
     ]
