@@ -13,16 +13,15 @@ namespace WebSocketMiddleware
 {
     public class WebSocketMiddleware
     {
-        public WebSocketController Controller { get; }
+        public Type ControllerType { get; }
+        public WebSocketController Controller { get; private set; }
         public RequestDelegate Next { get; }
-        public Dictionary<string, MethodInfo> ActionMap { get; }
+        public Dictionary<string, MethodInfo> ActionMap { get; private set; }
 
-        public WebSocketMiddleware(WebSocketController controller, RequestDelegate next)
+        public WebSocketMiddleware(Type controller, RequestDelegate next)
         {
-            Controller = controller;
+            ControllerType = controller;
             Next = next;
-
-            ActionMap = GenerateActionMap();
         }
 
         private Dictionary<string, MethodInfo> GenerateActionMap()
@@ -33,10 +32,10 @@ namespace WebSocketMiddleware
                 var actionAttr = method.GetCustomAttribute<WebSocketActionAttribute>();
                 if (actionAttr == null)
                     continue;
-                var methodRoute = (actionAttr.Route ?? method.Name).ToLowerInvariant();
-                if (dict.ContainsKey(methodRoute))
+                var action = (actionAttr.Action ?? method.Name).ToLowerInvariant();
+                if (dict.ContainsKey(action))
                     throw new Exception("Multiple actions with the same name are not supported");
-                dict[methodRoute] = method;
+                dict[action] = method;
             }
             return dict;
         }
@@ -48,6 +47,9 @@ namespace WebSocketMiddleware
                 await Next(ctx);
                 return;
             }
+
+            Controller = (WebSocketController)ctx.RequestServices.GetService(ControllerType);
+            ActionMap = GenerateActionMap();
 
             var client = new WebSocketClient(await ctx.WebSockets.AcceptWebSocketAsync());
             if (!Controller.Clients.TryAdd(client.Id, client))

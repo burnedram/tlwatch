@@ -12,7 +12,7 @@ using WebSocketMiddleware;
 
 namespace TLWatch.Controllers
 {
-    public class ChatController : WebSocketController
+    public class ChatController : WsController
     {
 
         public override async Task OnBinaryMessage(Stream stream)

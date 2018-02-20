@@ -6,11 +6,11 @@ namespace WebSocketMiddleware
 {
     public class WebSocketActionAttribute : Attribute
     {
-        public string Route { get; }
+        public string Action { get; }
 
-        public WebSocketActionAttribute(string route = null)
+        public WebSocketActionAttribute(string action = null)
         {
-            Route = route;
+            Action = action;
         }
     }
 }

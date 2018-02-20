@@ -26,15 +26,56 @@ namespace WebSocketMiddleware
 
         public static IServiceCollection AddWebSocketController<T>(this IServiceCollection services) where T : WebSocketController
         {
-            var t = typeof(T);
-            if (t.IsAbstract)
-                throw new ArgumentException($"WebSocketController must not be abstract, but {t.FullName} is abstract");
-            services.AddSingleton<T>();
+            return services.AddWebSocketController(typeof(T));
+        }
+
+        public static IServiceCollection AddWebSocketController(this IServiceCollection services, Type controller)
+        {
+            if (controller == null)
+                throw new ArgumentException("Must not be null", nameof(controller));
+            if (controller == null || controller.IsAbstract)
+                throw new ArgumentException($"WebSocketController must not be abstract, but {controller.FullName} is abstract");
+            services.AddSingleton(controller);
             return services;
         }
 
-        public static IApplicationBuilder MapWebSocketController(this IApplicationBuilder app, PathString path, WebSocketController controller)
+        public static IApplicationBuilder MapWebSocketControllers(this IApplicationBuilder app, Assembly assembly = null)
         {
+            if (assembly == null)
+                assembly = Assembly.GetEntryAssembly();
+            foreach (var type in assembly.GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(WebSocketController))))
+            {
+                var controllerName = type.Name;
+                if (controllerName.EndsWith("Controller", StringComparison.InvariantCultureIgnoreCase))
+                    controllerName = controllerName.Substring(0, controllerName.Length - "Controller".Length);
+
+                var routeAttr = type.GetCustomAttribute<WebSocketRouteAttribute>();
+                var route = routeAttr?.Route;
+                if (route == null)
+                {
+                    route = $"/{controllerName}";
+                } else
+                {
+                    route = route.Replace("[controller]", controllerName, StringComparison.InvariantCultureIgnoreCase);
+                }
+                app.MapWebSocketController(route, type);
+            }
+
+            return app;
+        }
+
+        public static IApplicationBuilder MapWebSocketController<T>(this IApplicationBuilder app, PathString path) where T : WebSocketController
+        {
+            return app.MapWebSocketController(path, typeof(T));
+        }
+
+        public static IApplicationBuilder MapWebSocketController(this IApplicationBuilder app, PathString path, Type controller)
+        {
+            if (controller == null)
+                throw new ArgumentException("Must not be null", nameof(controller));
+            if (controller == null || controller.IsAbstract)
+                throw new ArgumentException($"WebSocketController must not be abstract, but {controller.FullName} is abstract");
             return app.Map(path, (_app) => _app.UseMiddleware<WebSocketMiddleware>(controller));
         }
     }

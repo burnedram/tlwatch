@@ -68,7 +68,7 @@ namespace TLWatch
             app.UseStaticFiles();
 
             app.UseWebSockets();
-            app.MapWebSocketController("/ws/Chat", ServiceProvider.GetService<ChatController>());
+            app.MapWebSocketControllers();
 
             app.UseMvc(routes =>
             {
