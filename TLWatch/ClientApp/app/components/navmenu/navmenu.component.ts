@@ -6,4 +6,5 @@ import { Component } from '@angular/core';
     styleUrls: ['./navmenu.component.less']
 })
 export class NavMenuComponent {
+    collapse = true;
 }
