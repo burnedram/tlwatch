@@ -14,9 +14,9 @@ namespace WebSocketMiddleware
         public bool Success { get; set; }
 
         [JsonProperty(Required = Required.Always)]
-        public bool Void { get; set; }
+        public bool HasValue { get; set; }
 
-        [JsonProperty(Required = Required.Always)]
-        public object Result { get; set; }
+        [JsonProperty(Required = Required.AllowNull)]
+        public object Value { get; set; }
     }
 }

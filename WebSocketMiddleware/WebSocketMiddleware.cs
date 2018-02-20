@@ -111,8 +111,8 @@ namespace WebSocketMiddleware
                         {
                             Id = null,
                             Success = false,
-                            Void = false,
-                            Result = ex.ToString()
+                            HasValue = false,
+                            Value = ex.ToString()
                         });
                     }
 
@@ -124,8 +124,8 @@ namespace WebSocketMiddleware
                             {
                                 Id = message.Id,
                                 Success = false,
-                                Void = false,
-                                Result = "No such action"
+                                HasValue = false,
+                                Value = "No such action"
                             });
                         }
                         else
@@ -151,32 +151,36 @@ namespace WebSocketMiddleware
             {
                 Id = message.Id,
                 Success = true,
-                Void = true
+                HasValue = false
             };
 
-            if (!TryInvoke(method, message.Arguments, out object result, out Exception ex))
+            try
+            {
+                var result = method.Invoke(Controller, message.Args);
+                if (method.ReturnType == typeof(Task))
+                {
+                    // async Task Action(...)
+                    await (Task)result;
+                }
+                else if (method.ReturnType != typeof(void))
+                {
+                    if (method.ReturnType.IsGenericType && method.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
+                    {
+                        // async Task<T> Action(...)
+                        await (Task)result;
+                        result = result.GetType().GetProperty("Result").GetValue(result);
+                    }
+                    // Else T Action(...), so nothing needs to be done
+
+                    response.HasValue = true;
+                    response.Value = result;
+                }
+            }
+            catch (Exception ex)
             {
                 response.Success = false;
-                response.Void = false;
-                response.Result = ex.ToString();
-            }
-            else if (method.ReturnType == typeof(Task))
-            {
-                // async Task Action(...)
-                await (Task)result;
-            }
-            else if (method.ReturnType != typeof(void))
-            {
-                if (method.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
-                {
-                    // async Task<T> Action(...)
-                    await (Task)result;
-                    result = result.GetType().GetProperty("Result").GetValue(result);
-                }
-                // Else T Action(...), so nothing needs to be done
-
-                response.Void = false;
-                response.Result = result;
+                response.HasValue = true;
+                response.Value = ex.ToString();
             }
 
             SendResponse(client, response);
@@ -186,22 +190,6 @@ namespace WebSocketMiddleware
         {
             var jsonResponse = JsonConvert.SerializeObject(response);
             await client.Socket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(jsonResponse)), WebSocketMessageType.Text, true, CancellationToken.None);
-        }
-
-        private bool TryInvoke(MethodInfo method, object[] args, out object result, out Exception ex)
-        {
-            try
-            {
-                result = method.Invoke(Controller, args);
-                ex = null;
-                return true;
-            }
-            catch (Exception e)
-            {
-                result = null;
-                ex = e;
-                return false;
-            }
         }
     }
 }

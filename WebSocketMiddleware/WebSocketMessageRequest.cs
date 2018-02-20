@@ -14,6 +14,6 @@ namespace WebSocketMiddleware
         public string Action { get; set; }
 
         [JsonProperty(Required = Required.Always)]
-        public object[] Arguments { get; set; }
+        public object[] Args { get; set; }
     }
 }
