@@ -7,16 +7,16 @@ namespace WebSocketMiddleware
 {
     public class WebSocketMessageResponse
     {
-        [JsonProperty(Required = Required.AllowNull)]
+        [JsonProperty("id", Required = Required.AllowNull)]
         public Guid? Id { get; set; }
 
-        [JsonProperty(Required = Required.Always)]
+        [JsonProperty("success", Required = Required.Always)]
         public bool Success { get; set; }
 
-        [JsonProperty(Required = Required.Always)]
+        [JsonProperty("hasValue", Required = Required.Always)]
         public bool HasValue { get; set; }
 
-        [JsonProperty(Required = Required.AllowNull)]
+        [JsonProperty("value", Required = Required.AllowNull)]
         public object Value { get; set; }
     }
 }

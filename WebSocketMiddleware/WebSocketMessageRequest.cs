@@ -7,13 +7,13 @@ namespace WebSocketMiddleware
 {
     public class WebSocketMessageRequest
     {
-        [JsonProperty(Required = Required.Always)]
+        [JsonProperty("id", Required = Required.Always)]
         public Guid Id { get; set; }
 
-        [JsonProperty(Required = Required.Always)]
+        [JsonProperty("action", Required = Required.Always)]
         public string Action { get; set; }
 
-        [JsonProperty(Required = Required.Always)]
+        [JsonProperty("args", Required = Required.Always)]
         public object[] Args { get; set; }
     }
 }
